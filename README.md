@@ -35,3 +35,16 @@ go get -u github.com/codepkgs/go-apisix
         fmt.Printf("%#v\n", ssl)
     }
     ```
+
+* 根据资源名或标签Key过滤资源
+    
+    ```go
+    ups, err := client.GetUpstreams(apisix.WithName("apisix"), apisix.WithLabelKey("env"))
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    for _, up := range ups {
+        fmt.Printf("%#v\n", up)
+    }
+    ```
