@@ -161,3 +161,105 @@ go get -u github.com/codepkgs/go-apisix
       fmt.Printf("%#v", r)
   }
   ```
+
+# SSL证书管理
+
+* 查询所有证书
+
+  ```go
+  ssls, err := client.GetSSLs()
+  if err != nil {
+      fmt.Println(err)
+  } else {
+      for _, ssl := range ssls {
+          fmt.Printf("%#v\n", ssl)
+      }
+  }
+  ```
+
+* 查询指定ID的证书
+
+  ```go
+  ssl, _ := client.GetSSL("00000000000000000413")
+  fmt.Printf("%#v", ssl)
+  ```
+
+* 删除证书
+
+  ```go
+  resp, err := client.DeleteSSL("497242557483320181")
+  fmt.Println(resp, err)
+  ```
+
+* 创建证书
+
+  ```go
+  f, _ := os.OpenFile("/Users/codepkgs/Desktop/*.pgops.com.key", os.O_RDONLY, 0644)
+  key, _ := io.ReadAll(f)
+  defer f.Close()
+  
+  f1, _ := os.OpenFile("/Users/codepkgs/Desktop/*.pgops.com.crt", os.O_RDONLY, 0644)
+  cert, _ := io.ReadAll(f1)
+  defer f1.Close()
+  
+  sr, err := client.CreateSSL(
+      key, cert, []string{"*.pgops.com", "pgops.com"},
+      apisix.CreateSSLWithStatus(apisix.SSLEnable),
+      apisix.CreateSSLWithSSLProtocols([]apisix.SSLProtocol{apisix.TLSv11, apisix.TLSv12, apisix.TLSv13}),
+  )
+  fmt.Println(err)
+  fmt.Printf("%#v", sr)
+  ```
+  
+# Upstream管理
+
+* 查询所有的Upstream
+
+  ```go
+  ups, err := client.GetUpstreams()
+  fmt.Println(err)
+  for _, up := range ups {
+      fmt.Printf("%#v\n", up)
+  }
+  ```
+
+* 查询指定ID的Upstream
+
+  ```go
+  up, err := client.GetUpstream("00000000000000000306")
+  fmt.Println(err)
+  fmt.Printf("%#v\n", up)
+  ```
+  
+* 删除指定ID的Upstream
+  
+  ```go
+  up, err := client.DeleteUpstream("00000000000000000306")
+  fmt.Println(err)
+  fmt.Printf("%#v\n", up)
+  ```
+  
+* 创建Upstream
+
+  ```go
+  upi, err := client.CreateUpstream("test2",
+      apisix.CreateOrModifyUpstreamWithLoadBalancerType(apisix.RoundRobin),
+      apisix.CreateOrModifyUpstreamWithNodes([]apisix.UpstreamNode{
+          {Host: "172.16.158.29", Port: 9100, Weight: 1},
+          {Host: "172.16.158.29", Port: 9101, Weight: 2},
+      }),
+      apisix.CreateOrModifyUpstreamWithDesc("测试apisix"),
+      apisix.CreateOrModifyUpstreamWithKeepalivePool(apisix.KeepalivePool{
+          Size:        64,
+          Requests:    1000,
+          IdleTimeout: 60,
+      }),
+  )
+  fmt.Println(err)
+  fmt.Printf("%#v", upi)
+  ```
+  
+* 修改Upstream
+
+  > 修改Upstream和创建Upstream类似。
+
