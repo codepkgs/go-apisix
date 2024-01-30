@@ -6,13 +6,20 @@ import (
 )
 
 // GetSSLs 获取所有SSL证书
-func (c *Client) GetSSLs() ([]*SSL, error) {
+func (c *Client) GetSSLs(options ...QueryParamsOption) ([]*SSL, error) {
 	var (
-		gssls items
+		gssls sslItems
 		ssls  []*SSL
+		err   error
+		resp  []byte
 	)
 
-	resp, err := c.get("/ssls")
+	if len(options) != 0 {
+		resp, err = c.do(GET, "/ssls", nil, options...)
+	} else {
+		resp, err = c.do(GET, "/ssls", nil)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -31,32 +38,32 @@ func (c *Client) GetSSLs() ([]*SSL, error) {
 
 // GetSSL 获取指定SSL证书的信息
 func (c *Client) GetSSL(id string) (*SSL, error) {
-	var sr item
+	var si sslItem
 
-	resp, err := c.get(fmt.Sprintf("/ssls/%s", id))
+	resp, err := c.do(GET, fmt.Sprintf("/ssls/%s", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(resp, &sr)
+	err = json.Unmarshal(resp, &si)
 	if err != nil {
-		return sr.Value, err
+		return si.Value, err
 	}
-	return sr.Value, nil
+	return si.Value, nil
 }
 
 // DeleteSSL 删除指定的SSL证书
 func (c *Client) DeleteSSL(id string) (*DeleteItemResp, error) {
-	var dsr DeleteItemResp
-	resp, err := c.delete(fmt.Sprintf("/ssls/%s", id))
+	var di DeleteItemResp
+	resp, err := c.do(DELETE, fmt.Sprintf("/ssls/%s", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = json.Unmarshal(resp, &dsr); err != nil {
-		return &dsr, err
+	if err = json.Unmarshal(resp, &di); err != nil {
+		return &di, err
 	} else {
-		return &dsr, nil
+		return &di, nil
 	}
 }
 
@@ -104,16 +111,16 @@ func (c *Client) CreateSSL(key, cert []byte, snis []string, options ...CreateSSL
 		return nil, err
 	}
 
-	resp, err := c.post("/ssls", body)
+	resp, err := c.do(POST, "/ssls", body)
 	if err != nil {
 		return nil, err
 	}
 
-	var sr item
-	err = json.Unmarshal(resp, &sr)
+	var si sslItem
+	err = json.Unmarshal(resp, &si)
 	if err != nil {
 		return nil, err
 	}
 
-	return sr.Value, nil
+	return si.Value, nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -11,27 +12,60 @@ const (
 	RequestTimeout = 5000
 )
 
-// get GET请求
-func (c *Client) get(url string) ([]byte, error) {
-	fullUrl := c.Address + url
-	r := resty.New().
-		SetTimeout(time.Duration(RequestTimeout)*time.Millisecond).
-		R().
-		SetHeader("Content-Type", "application/json").
-		SetHeaderVerbatim("X-API-KEY", c.Token)
+// QueryParamsOption Get请求查询参数
+type QueryParamsOption func(map[string]string)
 
-	resp, err := r.Get(fullUrl)
-	if err != nil {
-		return nil, err
+// WithPageNumber 页数，默认展示第一页。
+func WithPageNumber(pageNumber int) QueryParamsOption {
+	return func(m map[string]string) {
+		m["page"] = strconv.Itoa(pageNumber)
 	}
-	if resp.StatusCode() != http.StatusOK {
-		return nil, fmt.Errorf("status: %d, body: %s", resp.StatusCode(), resp.Body())
-	}
-	return resp.Body(), nil
 }
 
-// post POST请求
-func (c *Client) post(url string, bytes []byte) ([]byte, error) {
+// WithPageSize 每页资源数量。如果不配置该参数，则展示所有查询到的资源。
+func WithPageSize(pageSize int) QueryParamsOption {
+	return func(m map[string]string) {
+		m["page_size"] = strconv.Itoa(pageSize)
+	}
+}
+
+// WithName 根据资源的 name 属性进行查询，如果资源本身没有 name 属性则不会出现在查询结果中。
+func WithName(name string) QueryParamsOption {
+	return func(m map[string]string) {
+		m["name"] = name
+	}
+}
+
+// WithLabelKey 根据资源的 label 属性进行查询，如果资源本身没有 label 属性则不会出现在查询结果中。
+func WithLabelKey(key string) QueryParamsOption {
+	return func(m map[string]string) {
+		m["label"] = key
+	}
+}
+
+// WithRouteUri 该参数仅在 Route 资源上支持。如果 Route 的 uri 等于查询的 uri 或 uris 包含查询的 uri，则该 Route 资源出现在查询结果中。
+func WithRouteUri(uri string) QueryParamsOption {
+	return func(m map[string]string) {
+		m["uri"] = uri
+	}
+}
+
+type RequestMethod string
+
+const (
+	GET    RequestMethod = "get"
+	PUT    RequestMethod = "put"
+	POST   RequestMethod = "post"
+	PATCH  RequestMethod = "patch"
+	DELETE RequestMethod = "delete"
+)
+
+func (c *Client) do(method RequestMethod, url string, bytes []byte, options ...QueryParamsOption) ([]byte, error) {
+	var (
+		resp *resty.Response
+		err  error
+	)
+
 	fullUrl := c.Address + url
 	r := resty.New().
 		SetTimeout(time.Duration(RequestTimeout)*time.Millisecond).
@@ -39,33 +73,37 @@ func (c *Client) post(url string, bytes []byte) ([]byte, error) {
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-API-KEY", c.Token)
 
-	r.SetBody(bytes)
+	switch method {
+	case GET:
+		if len(options) != 0 {
+			qs := make(map[string]string)
+			for _, option := range options {
+				option(qs)
+			}
 
-	resp, err := r.Post(fullUrl)
+			r.SetQueryParams(qs)
+		}
+		resp, err = r.Get(fullUrl)
+	case POST:
+		r.SetBody(bytes)
+		resp, err = r.Post(fullUrl)
+	case PUT:
+		r.SetBody(bytes)
+		resp, err = r.Put(fullUrl)
+	case DELETE:
+		resp, err = r.Delete(fullUrl)
+	case PATCH:
+		r.SetBody(bytes)
+		resp, err = r.Patch(fullUrl)
+	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
 		return nil, fmt.Errorf("status: %d, body: %s", resp.StatusCode(), resp.Body())
 	}
-	return resp.Body(), nil
-}
 
-// delete DELETE请求
-func (c *Client) delete(url string) ([]byte, error) {
-	fullUrl := c.Address + url
-	r := resty.New().
-		SetTimeout(time.Duration(RequestTimeout)*time.Millisecond).
-		R().
-		SetHeader("Content-Type", "application/json").
-		SetHeader("X-API-KEY", c.Token)
-
-	resp, err := r.Delete(fullUrl)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode() != http.StatusOK {
-		return nil, fmt.Errorf("status: %d, body: %s", resp.StatusCode(), resp.Body())
-	}
 	return resp.Body(), nil
 }
