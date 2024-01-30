@@ -15,9 +15,9 @@ func (c *Client) GetSSLs(options ...QueryParamsOption) ([]*SSL, error) {
 	)
 
 	if len(options) != 0 {
-		resp, err = c.do(GET, "/ssls", nil, options...)
+		resp, err = c.do(getMethod, "/ssls", nil, options...)
 	} else {
-		resp, err = c.do(GET, "/ssls", nil)
+		resp, err = c.do(getMethod, "/ssls", nil)
 	}
 
 	if err != nil {
@@ -40,14 +40,14 @@ func (c *Client) GetSSLs(options ...QueryParamsOption) ([]*SSL, error) {
 func (c *Client) GetSSL(id string) (*SSL, error) {
 	var si sslItem
 
-	resp, err := c.do(GET, fmt.Sprintf("/ssls/%s", id), nil)
+	resp, err := c.do(getMethod, fmt.Sprintf("/ssls/%s", id), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	err = json.Unmarshal(resp, &si)
 	if err != nil {
-		return si.Value, err
+		return nil, err
 	}
 	return si.Value, nil
 }
@@ -55,7 +55,7 @@ func (c *Client) GetSSL(id string) (*SSL, error) {
 // DeleteSSL 删除指定的SSL证书
 func (c *Client) DeleteSSL(id string) (*DeleteItemResp, error) {
 	var di DeleteItemResp
-	resp, err := c.do(DELETE, fmt.Sprintf("/ssls/%s", id), nil)
+	resp, err := c.do(deleteMethod, fmt.Sprintf("/ssls/%s", id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,6 @@ func CreateSSLWithSSLType(t SSLType) CreateSSLOption {
 
 // CreateSSL 创建SSL证书
 func (c *Client) CreateSSL(key, cert []byte, snis []string, options ...CreateSSLOption) (*SSL, error) {
-
 	cs := &createSSL{
 		Key:  string(key),
 		Cert: string(cert),
@@ -111,7 +110,7 @@ func (c *Client) CreateSSL(key, cert []byte, snis []string, options ...CreateSSL
 		return nil, err
 	}
 
-	resp, err := c.do(POST, "/ssls", body)
+	resp, err := c.do(postMethod, "/ssls", body)
 	if err != nil {
 		return nil, err
 	}

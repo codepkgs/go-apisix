@@ -15,9 +15,9 @@ func (c *Client) GetUpstreams(options ...QueryParamsOption) ([]*Upstream, error)
 	)
 
 	if len(options) != 0 {
-		resp, err = c.do(GET, "/upstreams", nil, options...)
+		resp, err = c.do(getMethod, "/upstreams", nil, options...)
 	} else {
-		resp, err = c.do(GET, "/upstreams", nil)
+		resp, err = c.do(getMethod, "/upstreams", nil)
 	}
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (c *Client) GetUpstreams(options ...QueryParamsOption) ([]*Upstream, error)
 
 // GetUpstream 获取指定的Upstream信息
 func (c *Client) GetUpstream(id string) (*Upstream, error) {
-	resp, err := c.do(GET, fmt.Sprintf("/upstreams/%s", id), nil)
+	resp, err := c.do(getMethod, fmt.Sprintf("/upstreams/%s", id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (c *Client) GetUpstream(id string) (*Upstream, error) {
 
 // DeleteUpstream 删除指定的Upstream
 func (c *Client) DeleteUpstream(id string) (*DeleteItemResp, error) {
-	resp, err := c.do(DELETE, fmt.Sprintf("/upstreams/%s", id), nil)
+	resp, err := c.do(deleteMethod, fmt.Sprintf("/upstreams/%s", id), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (c *Client) CreateUpstream(name string, options ...CreateOrModifyUpstreamOp
 		return nil, err
 	}
 
-	resp, err := c.do(POST, "/upstreams", body)
+	resp, err := c.do(postMethod, "/upstreams", body)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func (c *Client) ModifyUpstream(id string, options ...CreateOrModifyUpstreamOpti
 		return nil, err
 	}
 
-	resp, err := c.do(PUT, fmt.Sprintf("/upstreams/%s", id), body)
+	resp, err := c.do(putMethod, fmt.Sprintf("/upstreams/%s", id), body)
 	if err != nil {
 		return nil, err
 	}
