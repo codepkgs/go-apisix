@@ -50,17 +50,18 @@ func WithRouteUri(uri string) QueryParamsOption {
 	}
 }
 
-type RequestMethod string
+type requestMethod string
 
 const (
-	GET    RequestMethod = "get"
-	PUT    RequestMethod = "put"
-	POST   RequestMethod = "post"
-	PATCH  RequestMethod = "patch"
-	DELETE RequestMethod = "delete"
+	getMethod    requestMethod = "get"
+	putMethod    requestMethod = "put"
+	postMethod   requestMethod = "post"
+	patchMethod  requestMethod = "patch"
+	deleteMethod requestMethod = "delete"
 )
 
-func (c *Client) do(method RequestMethod, url string, bytes []byte, options ...QueryParamsOption) ([]byte, error) {
+// 发送HTTP请求
+func (c *Client) do(method requestMethod, url string, bytes []byte, options ...QueryParamsOption) ([]byte, error) {
 	var (
 		resp *resty.Response
 		err  error
@@ -74,7 +75,7 @@ func (c *Client) do(method RequestMethod, url string, bytes []byte, options ...Q
 		SetHeader("X-API-KEY", c.Token)
 
 	switch method {
-	case GET:
+	case getMethod:
 		if len(options) != 0 {
 			qs := make(map[string]string)
 			for _, option := range options {
@@ -84,15 +85,15 @@ func (c *Client) do(method RequestMethod, url string, bytes []byte, options ...Q
 			r.SetQueryParams(qs)
 		}
 		resp, err = r.Get(fullUrl)
-	case POST:
+	case postMethod:
 		r.SetBody(bytes)
 		resp, err = r.Post(fullUrl)
-	case PUT:
+	case putMethod:
 		r.SetBody(bytes)
 		resp, err = r.Put(fullUrl)
-	case DELETE:
+	case deleteMethod:
 		resp, err = r.Delete(fullUrl)
-	case PATCH:
+	case patchMethod:
 		r.SetBody(bytes)
 		resp, err = r.Patch(fullUrl)
 	}
