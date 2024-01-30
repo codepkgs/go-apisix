@@ -3,7 +3,36 @@ package apisix
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 )
+
+// ConvertUpstreamNodeStructToMap 将UpstreamNode struct转化成map格式的UpstreamNode
+func (c *Client) ConvertUpstreamNodeStructToMap(ups []*UpstreamNode) map[string]int64 {
+	nodes := make(map[string]int64, len(ups))
+	for _, u := range ups {
+		nodes[fmt.Sprintf("%s:%d", u.Host, u.Port)] = u.Weight
+	}
+	return nodes
+}
+
+// ConvertUpstreamNodeMapToStruct 将map格式的UpstreamNode转化成UpstreaNode struct
+func (c *Client) ConvertUpstreamNodeMapToStruct(ups map[string]int64) ([]UpstreamNode, error) {
+	nodes := make([]UpstreamNode, 0, len(ups))
+	for k, v := range ups {
+		hp := strings.Split(k, ":")
+		if len(hp) != 2 {
+			return nodes, fmt.Errorf(`invalid upstream node map, the format must be {"host:port": weight}, example: {"172.16.1.1:9000": 1}`)
+		}
+		host := hp[0]
+		port, err := strconv.Atoi(hp[1])
+		if err != nil {
+			return nodes, err
+		}
+		nodes = append(nodes, UpstreamNode{Host: host, Port: int64(port), Weight: v})
+	}
+	return nodes, nil
+}
 
 // GetUpstreams 获取符合条件的Upstreams
 func (c *Client) GetUpstreams(options ...QueryParamsOption) ([]*Upstream, error) {

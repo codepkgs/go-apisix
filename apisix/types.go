@@ -236,47 +236,66 @@ type Unhealthy struct {
 }
 
 /*
+HTTP METHOD 相关的类型定义
+*/
+
+type HTTPMethod string
+
+const (
+	GET     HTTPMethod = "GET"
+	POST    HTTPMethod = "POST"
+	PUT     HTTPMethod = "PUT"
+	DELETE  HTTPMethod = "DELETE"
+	PATCH   HTTPMethod = "PATCH"
+	HEAD    HTTPMethod = "HEAD"
+	OPTIONS HTTPMethod = "OPTIONS"
+	CONNECT HTTPMethod = "CONNECT"
+	TRACE   HTTPMethod = "TRACE"
+	PURGE   HTTPMethod = "PURGE"
+)
+
+/*
 Route 相关的类型定义
 */
 
-type GetRoutesResp struct {
-	Total int64       `json:"total"`
-	List  []RouteList `json:"list"`
+type routeItems struct {
+	Total int64       `json:"total,omitempty"`
+	List  []routeItem `json:"list,omitempty"`
 }
 
-type RouteList struct {
-	Key           string `json:"key"`
-	Value         Route  `json:"value"`
-	ModifiedIndex int64  `json:"modifiedIndex"`
-	CreatedIndex  int64  `json:"createdIndex"`
+type routeItem struct {
+	Key           string `json:"key,omitempty"`
+	Value         *Route `json:"value,omitempty"`
+	ModifiedIndex int64  `json:"modifiedIndex,omitempty"`
+	CreatedIndex  int64  `json:"createdIndex,omitempty"`
 }
 
 type Route struct {
-	Uri             string                 `json:"uri,omitempty"`
-	Uris            []string               `json:"uris,omitempty"`
-	Name            string                 `json:"name,omitempty"`
-	Id              string                 `json:"id,omitempty"`
-	Desc            string                 `json:"desc,omitempty"`
-	Priority        int64                  `json:"priority,omitempty"`
-	Methods         []string               `json:"methods,omitempty"`
-	Host            string                 `json:"host,omitempty"`
-	Hosts           []string               `json:"hosts,omitempty"`
-	RemoteAddrs     []string               `json:"remote_addrs,omitempty"`
-	Timeout         *Timeout               `json:"timeout,omitempty"`
-	Plugins         map[string]interface{} `json:"plugins,omitempty"`
-	ServiceId       string                 `json:"service_id,omitempty"`
-	Upstream        *Upstream              `json:"upstream,omitempty"`
-	UpstreamId      string                 `json:"upstream_id,omitempty"`
-	Status          *RouteStatus           `json:"status,omitempty"`
-	EnableWebsocket bool                   `json:"enable_websocket,omitempty"`
-	Labels          map[string]string      `json:"labels,omitempty"  `
-	CreateTime      int64                  `json:"create_time,omitempty"`
-	UpdateTime      int64                  `json:"update_time,omitempty"`
+	Id              string            `json:"id,omitempty"`
+	Uri             string            `json:"uri,omitempty"`
+	Uris            []string          `json:"uris,omitempty"`
+	Name            string            `json:"name,omitempty"`
+	Desc            string            `json:"desc,omitempty"`
+	Priority        int64             `json:"priority,omitempty"`
+	Methods         []HTTPMethod      `json:"methods,omitempty"`
+	Host            string            `json:"host,omitempty"`
+	Hosts           []string          `json:"hosts,omitempty"`
+	RemoteAddrs     []string          `json:"remote_addrs,omitempty"`
+	Timeout         *Timeout          `json:"timeout,omitempty"`
+	Plugins         map[string]any    `json:"plugins,omitempty"`
+	ServiceId       string            `json:"service_id,omitempty"`
+	Upstream        *Upstream         `json:"upstream,omitempty"`
+	UpstreamId      string            `json:"upstream_id,omitempty"`
+	Status          RouteStatus       `json:"status,omitempty"`
+	EnableWebsocket bool              `json:"enable_websocket,omitempty"`
+	Labels          map[string]string `json:"labels,omitempty"  `
+	CreateTime      int64             `json:"create_time,omitempty"`
+	UpdateTime      int64             `json:"update_time,omitempty"`
 }
 
 type RouteStatus int64
 
 const (
 	RouteDisable RouteStatus = 0
-	RouteEnable              = 1
+	RouteEnable  RouteStatus = 1
 )
