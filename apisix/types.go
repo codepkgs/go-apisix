@@ -299,3 +299,33 @@ const (
 	RouteDisable RouteStatus = 0
 	RouteEnable  RouteStatus = 1
 )
+
+/*
+Service 相关的类型定义
+*/
+
+type serviceItems struct {
+	Total int64         `json:"total,omitempty"`
+	List  []serviceItem `json:"list,omitempty"`
+}
+
+type serviceItem struct {
+	Key           string   `json:"key,omitempty"`
+	Value         *Service `json:"value,omitempty"`
+	ModifiedIndex int64    `json:"modifiedIndex,omitempty"`
+	CreatedIndex  int64    `json:"createdIndex,omitempty"`
+}
+
+type Service struct {
+	ID              string            `json:"id,omitempty"`
+	Name            string            `json:"name,omitempty"`
+	Desc            string            `json:"desc,omitempty"`
+	Labels          map[string]string `json:"labels,omitempty"`
+	EnableWebsocket bool              `json:"enable_websocket,omitempty"`
+	Upstream        *Upstream         `json:"upstream,omitempty"`
+	UpstreamId      string            `json:"upstream_id,omitempty"`
+	Hosts           []string          `json:"hosts,omitempty"`
+	Plugins         map[string]any    `json:"plugins,omitempty"`
+	CreateTime      int64             `json:"create_time,omitempty"`
+	UpdateTime      int64             `json:"update_time,omitempty"`
+}

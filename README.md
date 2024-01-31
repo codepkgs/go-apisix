@@ -105,7 +105,7 @@ go get -u github.com/codepkgs/go-apisix
           Labels: map[string]string{"env": "test"},
           Type:   apisix.RoundRobin,
           Scheme: apisix.HTTP,
-          Nodes: client.ConvertUpstreamNodeStructToMap(
+          Nodes: apisix.ConvertUpstreamNodeStructToMap(
               []*apisix.UpstreamNode{
                   {Host: "172.16.158.29", Port: 9100, Weight: 1},
                   {Host: "172.16.158.30", Port: 9100, Weight: 1},
@@ -145,7 +145,7 @@ go get -u github.com/codepkgs/go-apisix
           Labels: map[string]string{"env": "test"},
           Type:   apisix.RoundRobin,
           Scheme: apisix.HTTP,
-          Nodes: client.ConvertUpstreamNodeStructToMap(
+          Nodes: apisix.ConvertUpstreamNodeStructToMap(
               []*apisix.UpstreamNode{
                   {Host: "172.16.158.29", Port: 9000, Weight: 1},
               },
@@ -263,3 +263,80 @@ go get -u github.com/codepkgs/go-apisix
 
   > 修改Upstream和创建Upstream类似。
 
+
+# Service管理
+
+> Service 是某类 API 的抽象（也可以理解为一组 Route 的抽象）。它通常与上游服务抽象是一一对应的，Route 与 Service 之间，通常是 N:1 的关系。
+
+* 查看所有的Service
+
+  ```go
+  if services, err := client.GetServices(); err != nil {
+      fmt.Println(err)
+  } else {
+      for _, service := range services {
+          fmt.Printf("%#v\n", service)
+      }
+  }
+  ```
+  
+* 查看指定的Service
+
+  ```go
+  if service, err := client.GetService("498414477645972341"); err != nil {
+      fmt.Println(err)
+  } else {
+      fmt.Printf("%#v\n", service)
+  }
+  ```
+  
+* 删除Service
+
+  ```go
+  resp, err := client.DeleteService("498414477645972341")
+  fmt.Println(err)
+  fmt.Printf("%#v\n", resp)
+  ```
+
+* 创建Service
+
+  ```go
+  service, err := client.CreateService(
+      "apisix new dashboard",
+      apisix.CreateOrModifyServiceWithDesc("apisix new dashboard"),
+      apisix.CreateOrModifyServiceWithLabels(map[string]string{"env": "prod", "app": "apisix-dashboard"}),
+      apisix.CreateOrModifyServiceWithHosts([]string{"apisix-dashboard.pgops.com"}),
+      apisix.CreateOrModifyServiceWithUpstream(&apisix.Upstream{
+          Name:   "apisix new dashboard",
+          Desc:   "apisix new dashboard for production",
+          Labels: map[string]string{"env": "prod", "app": "apisix-dashboard"},
+          Type:   apisix.RoundRobin,
+          Scheme: apisix.HTTP,
+          Nodes: apisix.ConvertUpstreamNodeStructToMap([]*apisix.UpstreamNode{
+              {Host: "172.16.1.58.29", Port: 9100, Weight: 1},
+          }),
+      }),
+  )
+  if err != nil {
+      fmt.Println(err)
+  } else {
+      fmt.Printf("%#v\n", service)
+  }
+  ```
+
+* 修改Service
+
+  ```go
+  service, err := client.ModifyService(
+      "498414477645972341",
+      apisix.CreateOrModifyServiceWithDesc("apisix dashboard for test"),
+      apisix.CreateOrModifyServiceWithName("apisix dashboard"),
+      apisix.CreateOrModifyServiceWithLabels(map[string]string{"env": "test", "app": "apisix-dashboard"}),
+      apisix.CreateOrModifyServiceWithHosts([]string{"d.pgops.com", "dashboard.pgops.com"}),
+  )
+  if err != nil {
+      fmt.Println(err)
+  } else {
+      fmt.Printf("%#v\n", service)
+  }
+  ```

@@ -8,7 +8,7 @@ import (
 )
 
 // ConvertUpstreamNodeStructToMap 将UpstreamNode struct转化成map格式的UpstreamNode
-func (c *Client) ConvertUpstreamNodeStructToMap(ups []*UpstreamNode) map[string]int64 {
+func ConvertUpstreamNodeStructToMap(ups []*UpstreamNode) map[string]int64 {
 	nodes := make(map[string]int64, len(ups))
 	for _, u := range ups {
 		nodes[fmt.Sprintf("%s:%d", u.Host, u.Port)] = u.Weight
@@ -17,7 +17,7 @@ func (c *Client) ConvertUpstreamNodeStructToMap(ups []*UpstreamNode) map[string]
 }
 
 // ConvertUpstreamNodeMapToStruct 将map格式的UpstreamNode转化成UpstreaNode struct
-func (c *Client) ConvertUpstreamNodeMapToStruct(ups map[string]int64) ([]UpstreamNode, error) {
+func ConvertUpstreamNodeMapToStruct(ups map[string]int64) ([]UpstreamNode, error) {
 	nodes := make([]UpstreamNode, 0, len(ups))
 	for k, v := range ups {
 		hp := strings.Split(k, ":")
