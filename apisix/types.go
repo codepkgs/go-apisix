@@ -376,3 +376,32 @@ type PluginAttribute struct {
 	Type       string   `json:"type,omitempty"`
 	Required   []string `json:"required,omitempty"`
 }
+
+/*
+StreamRoute 类型定义
+*/
+type streamRouteItems struct {
+	Total int64             `json:"total,omitempty"`
+	List  []streamRouteItem `json:"list,omitempty"`
+}
+
+type streamRouteItem struct {
+	Key           string       `json:"key,omitempty"`
+	Value         *StreamRoute `json:"value,omitempty"`
+	ModifiedIndex int64        `json:"modifiedIndex,omitempty"`
+	CreatedIndex  int64        `json:"createdIndex,omitempty"`
+}
+
+// StreamRoute TODO: 不支持xrpc协议
+type StreamRoute struct {
+	ID         string    `json:"id,omitempty"`
+	ServerAddr string    `json:"server_addr,omitempty"`
+	ServerPort int64     `json:"server_port,omitempty"`
+	RemoteAddr string    `json:"remote_addr,omitempty"`
+	Upstream   *Upstream `json:"upstream,omitempty"`
+	UpstreamId string    `json:"upstream_id,omitempty"`
+	ServiceId  string    `json:"service_id,omitempty"`
+	Sni        string    `json:"sni,omitempty"`
+	CreateTime int64     `json:"create_time,omitempty"`
+	UpdateTime int64     `json:"update_time,omitempty"`
+}

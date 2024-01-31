@@ -340,3 +340,71 @@ go get -u github.com/codepkgs/go-apisix
       fmt.Printf("%#v\n", service)
   }
   ```
+
+# StreamRoute管理
+
+> 每添加一个 `StreamRoute` 的 `ServerPort` 都需要在 apisix 的配置文件中 `stream_proxy` 中添加对应的端口，并且执行 `apisix reload` 重新加载配置。
+
+* 查看所有的StreamRoute
+
+  ```go
+  if streamRoutes, err := client.GetStreamRoutes(); err != nil {
+      fmt.Println(err)
+  } else {
+      for _, route := range streamRoutes {
+          fmt.Printf("%#v\n", route)
+      }
+  }
+  ```
+
+* 查看指定的StreamRoute
+
+  ```go
+  if route, err := client.GetStreamRoute("1"); err != nil {
+      fmt.Println(err)
+  } else {
+      fmt.Printf("%#v\n", route)
+  }
+  ```
+  
+* 创建StreamRoute
+  
+  ```go
+  route, err := client.CreateStreamRoute(
+      apisix.CreateOrModifyStreamRouteWithServerPort(6379),
+      apisix.CreateOrModifyStreamRouteWithUpstream(&apisix.Upstream{
+          Type: apisix.RoundRobin,
+          Nodes: apisix.ConvertUpstreamNodeStructToMap([]*apisix.UpstreamNode{
+              {Host: "172.16.152.29", Port: 6379, Weight: 1},
+          }),
+      }),
+  )
+  fmt.Println(err)
+  fmt.Println(route)
+  ```
+
+* 修改StreamRoute
+
+  ```go
+  route, err := client.ModifyStreamRoute(
+      apisix.CreateOrModifyStreamRouteWithServerPort(6379),
+      apisix.CreateOrModifyStreamRouteWithUpstream(&apisix.Upstream{
+          Type: apisix.RoundRobin,
+          Nodes: apisix.ConvertUpstreamNodeStructToMap([]*apisix.UpstreamNode{
+              {Host: "172.16.152.30", Port: 6379, Weight: 1},
+          }),
+      }),
+  )
+  fmt.Println(err)
+  fmt.Println(route)
+  ```
+  
+* 删除指定ID的StreamRoute
+
+  ```go
+  if di, err := client.DeleteStreamRoute("1"); err != nil {
+      fmt.Println(err)
+  } else {
+      fmt.Printf("%#v", di)
+  }
+  ```
