@@ -86,15 +86,21 @@ func (c *Client) do(method requestMethod, url string, bytes []byte, options ...Q
 		}
 		resp, err = r.Get(fullUrl)
 	case postMethod:
-		r.SetBody(bytes)
+		if bytes != nil {
+			r.SetBody(bytes)
+		}
 		resp, err = r.Post(fullUrl)
 	case putMethod:
-		r.SetBody(bytes)
+		if bytes != nil {
+			r.SetBody(bytes)
+		}
 		resp, err = r.Put(fullUrl)
 	case deleteMethod:
 		resp, err = r.Delete(fullUrl)
 	case patchMethod:
-		r.SetBody(bytes)
+		if bytes != nil {
+			r.SetBody(bytes)
+		}
 		resp, err = r.Patch(fullUrl)
 	}
 
