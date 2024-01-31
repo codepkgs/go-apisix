@@ -329,3 +329,50 @@ type Service struct {
 	CreateTime      int64             `json:"create_time,omitempty"`
 	UpdateTime      int64             `json:"update_time,omitempty"`
 }
+
+/*
+GlobalRule 类型定义
+*/
+
+type globalruleItems struct {
+	Total int64            `json:"total,omitempty"`
+	List  []globalruleItem `json:"list,omitempty"`
+}
+
+type globalruleItem struct {
+	Key           string      `json:"key,omitempty"`
+	Value         *GlobalRule `json:"value,omitempty"`
+	ModifiedIndex int64       `json:"modifiedIndex,omitempty"`
+	CreatedIndex  int64       `json:"createdIndex,omitempty"`
+}
+
+type GlobalRule struct {
+	ID         string                          `json:"id,omitempty"`
+	Plugins    map[string]GlobalRulePluginMeta `json:"plugins,omitempty"`
+	CreateTime int64                           `json:"create_time,omitempty"`
+	UpdateTime int64                           `json:"update_time,omitempty"`
+}
+
+type GlobalRulePluginMeta struct {
+	Meta struct {
+		Disable bool `json:"disable,omitempty"`
+	} `json:"_meta,omitempty"`
+}
+
+/*
+Plugin 类型定义
+*/
+
+type PluginSubsystem string
+
+const (
+	HTTPSubsystem   PluginSubsystem = "http"
+	StreamSubsystem PluginSubsystem = "stream"
+)
+
+type PluginAttribute struct {
+	Comment    string   `json:"$comment,omitempty"`
+	Properties []string `json:"properties,omitempty"`
+	Type       string   `json:"type,omitempty"`
+	Required   []string `json:"required,omitempty"`
+}
